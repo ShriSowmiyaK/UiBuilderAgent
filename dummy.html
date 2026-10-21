@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Popover Component</title>
+
+  <style>
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+    }
+
+    body {
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 16px;
+      margin: 0;
+      font-family: "Trust Hartford Sans", Arial, sans-serif;
+    }
+
+    .popover-anchor {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+    }
+
+    /* Primary Medium Button */
+    .popover-trigger {
+      display: block;
+      text-align: center;
+      user-select: none;
+      border: 1px solid #75013F;
+      cursor: pointer;
+      margin: 0;
+      font-family: "Trust Hartford Sans", Arial, sans-serif;
+      line-height: 1.5;
+      border-radius: 0.25rem;
+      font-weight: 700;
+      min-width: 200px;
+      padding: 7px 12px;
+      font-size: 16px;
+      color: #ffffff;
+      background-color: #75013F;
+      border-color: #75013F;
+    }
+
+    .popover-trigger:hover {
+      color: #ffffff;
+      background-color: #5e0132;
+      border-color: #58012f;
+    }
+
+    .popover-trigger:focus {
+      outline: none;
+      box-shadow:
+        0 0 0 0.125rem rgb(255, 255, 255),
+        0 0 0 0.25rem rgb(254, 48, 130);
+    }
+
+    .popover-trigger:active {
+      color: #ffffff;
+      background-color: #52012c;
+      border-color: #4c0129;
+      box-shadow: inset 0 3px 5px 0 rgba(0, 0, 0, 0.13);
+    }
+
+    .popover-trigger:disabled {
+      cursor: not-allowed;
+      opacity: 1;
+      box-shadow: none;
+      color: #ffffff;
+      background-color: #75013F;
+      border-color: #75013F;
+    }
+
+    /* Popover Container */
+    .popover {
+      display: none;
+      position: absolute;
+      top: calc(100% + 11px);
+      bottom: auto;
+      left: 50%;
+      right: auto;
+      transform: translateX(-50%);
+      width: fit-content;
+      max-width: 320px;
+      max-height: 320px;
+      background: #ffffff;
+      border: 1px solid rgba(0, 0, 0, 0.2);
+      border-top: 6px solid #e1d8cf;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.75);
+      padding: 16px;
+      color: #000000;
+      font-family: "Trust Hartford Sans", Arial, sans-serif;
+      line-height: 1.42857;
+      font-size: 16px;
+      font-weight: 300;
+      z-index: 1000;
+      white-space: normal;
+      word-wrap: break-word;
+      overflow-wrap: break-word;
+      overflow-y: auto;
+    }
+
+    .popover.is-active {
+      display: flex !important;
+      flex-direction: column;
+    }
+
+    /* Bottom Placement Indicator */
+    .popover::after {
+      content: "";
+      position: absolute;
+      display: block;
+      top: -16px;
+      bottom: auto;
+      left: 50%;
+      right: auto;
+      margin-left: -10px;
+      margin-top: 0;
+      width: 0;
+      height: 0;
+      border-style: solid;
+      border-width: 0 10px 10px 10px;
+      border-color: transparent;
+      border-bottom-color: #ffffff;
+    }
+
+    /* Header Row */
+    .popover-header-row {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      flex-shrink: 0;
+    }
+
+    /* Header Title */
+    .popover-title {
+      margin: 0;
+      padding: 0 32px 12px 0;
+      font-size: 20px;
+      font-weight: 500;
+      color: #75013f;
+      font-family: "Trust Hartford Sans", Arial, sans-serif;
+      flex: 1 1 auto;
+      overflow-wrap: break-word;
+    }
+
+    /* Close Button */
+    .popover-close {
+      position: static;
+      width: 24px;
+      height: 24px;
+      cursor: pointer;
+      background: none;
+      border: none;
+      padding: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1001;
+      flex-shrink: 0;
+    }
+
+    .popover-close:focus {
+      outline: none;
+      box-shadow:
+        0 0 0 0.125rem rgb(255, 255, 255),
+        0 0 0 0.25rem rgb(254, 48, 130);
+    }
+
+    .popover-close svg {
+      width: 16px;
+      height: 16px;
+      pointer-events: none;
+      display: block;
+    }
+
+    /* Scrollable Body */
+    .popover-body {
+      font-size: 16px;
+      text-align: start;
+      line-height: 1.4;
+      font-family: "Trust Hartford Sans", Arial, sans-serif;
+      font-weight: 300;
+      color: #1a1a1a;
+      flex: 1 1 auto;
+      min-height: 0;
+      overflow-y: auto;
+      padding-right: 4px;
+    }
+
+    /* Responsive Button Sizing */
+    @media (max-width: 767px) {
+      .popover-trigger {
+        width: 100%;
+      }
+    }
+
+    /* Left and Right placements are not enabled for this component.
+       Bottom placement remains centered at every viewport width. */
+
+    @media (max-width: 575px) {
+      .popover {
+        width: max-content;
+        max-width: min(320px, calc(100vw - 32px));
+        max-height: 320px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="popover-anchor">
+    <button
+      type="button"
+      class="popover-trigger"
+      id="popoverTrigger"
+      aria-expanded="false"
+      aria-controls="partyPopover"
+    >
+      Invite others to the party
+    </button>
+
+    <div
+      class="popover"
+      id="partyPopover"
+      role="dialog"
+      aria-labelledby="popoverTitle"
+      aria-hidden="true"
+    >
+      <div class="popover-header-row">
+        <h2 class="popover-title" id="popoverTitle">
+          designated by an indent or a line break.Paragraphs are at least one sentence long and are usually one part of a larger whole. Visually, a paragraph is a “chunk” of text on a page with space above and below. Each one contains a point or idea that should connect to the paragraphs around it.
+        </h2>
+
+        <button
+          type="button"
+          class="popover-close"
+          id="popoverClose"
+          aria-label="Close popover"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="16"
+            height="16"
+            viewBox="0 0 16 16"
+            fill="none"
+            style="pointer-events: none;"
+          >
+            <path
+              d="M0.839887 15.1602C0.955946 15.2763 1.10753 15.3331 1.25912 15.3331C1.40952 15.3331 1.56111 15.2763 1.67717 15.1602L8.00002 8.83737L14.3229 15.1602C14.4377 15.2763 14.5893 15.3331 14.7409 15.3331C14.8925 15.3331 15.0441 15.2763 15.1602 15.1602C15.3911 14.9293 15.3911 14.5539 15.1602 14.3229L8.8373 8.00008L15.1602 1.67723C15.3911 1.4463 15.3911 1.07207 15.1602 0.839948C14.928 0.609015 14.5538 0.609015 14.3229 0.839948L8.00002 7.16281L1.67717 0.839948C1.44624 0.609015 1.07082 0.609015 0.839887 0.839948C0.608954 1.07207 0.608954 1.4463 0.839887 1.67723L7.16274 8.00008L0.839887 14.3229C0.608954 14.5539 0.608954 14.9293 0.839887 15.1602Z"
+              fill="#75013F"
+            />
+          </svg>
+        </button>
+      </div>
+
+      <div class="popover-body"></div>
+    </div>
+  </div>
+
+  <script>
+    const trigger = document.getElementById("popoverTrigger");
+    const popover = document.getElementById("partyPopover");
+    const closeButton = document.getElementById("popoverClose");
+
+    function openPopover() {
+      popover.classList.add("is-active");
+      trigger.setAttribute("aria-expanded", "true");
+      popover.setAttribute("aria-hidden", "false");
+    }
+
+    function closePopover() {
+      popover.classList.remove("is-active");
+      trigger.setAttribute("aria-expanded", "false");
+      popover.setAttribute("aria-hidden", "true");
+      trigger.focus();
+    }
+
+    trigger.addEventListener("click", () => {
+      if (popover.classList.contains("is-active")) {
+        closePopover();
+      } else {
+        openPopover();
+      }
+    });
+
+    closeButton.addEventListener("click", closePopover);
+
+    /* Clicks inside or outside the popover do not change its state. */
+  </script>
+</body>
+</html>
